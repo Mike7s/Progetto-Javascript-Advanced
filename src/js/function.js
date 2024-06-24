@@ -13,8 +13,10 @@ export function searchBooks() {
     const genre = input.value.trim().toLowerCase();
     if (!genre) {
         errorMessage.textContent = 'INSERT A GENRE';
+        errorMessage.classList.remove('display-none');
         return
     }
+    errorMessage.classList.add('display-none')
     bookContainer.replaceChildren();
     errorMessage.replaceChildren();
     fetchData(genre)
@@ -57,6 +59,7 @@ async function fetchBook() {
         button.addEventListener('click', async () => {
             const bookKey = button.getAttribute('book-key');
             spinner.classList.remove('display-none');
+            try{
             const response = await axios.get(`https://openlibrary.org${bookKey}.json`)
             let description = 'no description';
             spinner.classList.add('display-none');
@@ -68,8 +71,11 @@ async function fetchBook() {
                 }
             }
             descriptionHtml.textContent = description;
+        }catch (error) {
+            console.error('Error fetching book description:', error);
+            descriptionHtml.textContent = 'Error fetching book description';
+        }
             modalContainer.classList.remove('display-none');
-
         })
     });
 }
@@ -90,8 +96,10 @@ async function fetchData(genre) {
         spinner.classList.add('display-none');
         if ( books.length === 0 || books === undefined) {
             errorMessage.textContent = 'Not found';
+            errorMessage.classList.remove('display-none')
             return
         }
+        errorMessage.classList.add('display-none')
         books.forEach(book => {
             const bookTitle = book.title;
             const bookAuthor = _.uniq(book.authors.map(author => author.name));
