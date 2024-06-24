@@ -3,15 +3,16 @@ import _ from "lodash";
 
 const input = document.querySelector('#searchInput');
 const bookContainer = document.querySelector('.container');
-const errorMessage= document.querySelector('.error-message');
-const modalContainer= document.querySelector('.modal-container');
+const errorMessage = document.querySelector('.error-message');
+const modalContainer = document.querySelector('.modal-container');
 const closeModalBtn = document.querySelector('.close-modal');
 const descriptionHtml = document.querySelector('.modal');
+const spinner = document.querySelector('.spinner');
 
 export function searchBooks() {
-    const genre = input.value;
+    const genre = input.value.trim().toLowerCase();
     if (!genre) {
-      errorMessage.textContent='INSERT A GENRE';
+        errorMessage.textContent = 'INSERT A GENRE';
         return
     }
     bookContainer.replaceChildren();
@@ -19,78 +20,81 @@ export function searchBooks() {
     fetchData(genre)
 }
 
-function createCard(bookTitle, bookAuthor, bookContainer, bookKey,keyType,identifier) {
+function createCard(bookTitle, bookAuthor, bookContainer, bookKey, keyType, identifier) {
     const card = document.createElement('div');
-    card.textContent = bookTitle;
     card.classList.add('card');
     bookContainer.appendChild(card);
 
+    const author = document.createElement('h1');
+    author.textContent = bookAuthor;
+    author.classList.add('book-author');
+    
     const title = document.createElement('h1');
     title.textContent = bookAuthor;
     title.classList.add('book-title');
-    card.appendChild(title);
+
+    const info = document.createElement('div');
+    info.appendChild(title);
+    info.appendChild(author);
+    card.appendChild(info);
 
     const img = document.createElement('img');
-        img.src = `https://covers.openlibrary.org/b/${keyType}/${identifier}-M.jpg`;
-        img.alt = `${bookTitle} cover`;
-        img.classList.add('book-cover');
-        card.appendChild(img);
+    img.src = `https://covers.openlibrary.org/b/${keyType}/${identifier}-M.jpg`;
+    img.alt = `${bookTitle} cover`;
+    img.classList.add('book-cover');
+    card.appendChild(img);
 
     const button = document.createElement('button');
     button.textContent = 'Description';
     button.setAttribute('book-key', bookKey);
-    button.setAttribute('is-open', false);
     button.classList.add('btn-description');
     card.appendChild(button);
 
-    const description = document.createElement('p');
-    description.setAttribute('book-key', bookKey);
-    card.appendChild(description)
 }
 
 async function fetchBook() {
     document.querySelectorAll('.btn-description').forEach(button => {
         button.addEventListener('click', async () => {
             const bookKey = button.getAttribute('book-key');
-            const isOpen = button.getAttribute('is-open');
-            
-
-            if (isOpen === 'false') {
-                button.setAttribute('is-open', true);
-                const response = await axios.get(`https://openlibrary.org${bookKey}.json`)
-                let description = 'no description';
-                if (response && response.data && response.data.description) {
-                    if (response.data.description.value) {
-                        description = response.data.description.value;
-                    } else if (response.data.description) {
-                        description = response.data.description
-                    }
+            spinner.classList.remove('display-none');
+            const response = await axios.get(`https://openlibrary.org${bookKey}.json`)
+            let description = 'no description';
+            spinner.classList.add('display-none');
+            if (response && response.data && response.data.description) {
+                if (response.data.description.value) {
+                    description = response.data.description.value;
+                } else if (response.data.description) {
+                    description = response.data.description
                 }
-                descriptionHtml.textContent = description;
-                modalContainer.classList.remove('display-none');
-            } else {
-                button.setAttribute('is-open', false);
-               closeModal();
             }
+            descriptionHtml.textContent = description;
+            modalContainer.classList.remove('display-none');
+
         })
     });
 }
 
-export function closeModal(){
-closeModalBtn.addEventListener('click',()=>{
-    modalContainer.classList.add('display-none')
-    descriptionHtml.replaceChildren();
-    
-})
+export function closeModal() {
+    closeModalBtn.addEventListener('click', () => {
+        modalContainer.classList.add('display-none')
+        descriptionHtml.replaceChildren();
+    })
 }
 
 async function fetchData(genre) {
     try {
+        spinner.classList.remove('display-none');
         const response = await axios.get(`https://openlibrary.org/subjects/${genre}.json`);
         const books = response.data.works;
+        console.log(books)
+        spinner.classList.add('display-none');
+        if ( books.length === 0 || books === undefined) {
+            errorMessage.textContent = 'Not found';
+            return
+        }
         books.forEach(book => {
             const bookTitle = book.title;
-            const bookAuthor =_.uniq(book.authors.map(author => author.name));
+            const bookAuthor = _.uniq(book.authors.map(author => author.name));
             const bookKey = book.key;
 
             let keyType = null;
@@ -113,7 +117,7 @@ async function fetchData(genre) {
                 identifier = book.id;
             }
 
-            createCard(bookTitle, bookAuthor, bookContainer, bookKey,keyType,identifier);
+            createCard(bookTitle, bookAuthor, bookContainer, bookKey, keyType, identifier);
         });
         fetchBook();
     }

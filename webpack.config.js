@@ -1,6 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { type } = require('os');
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     entry: {
@@ -13,8 +14,19 @@ module.exports = {
     plugins: [
         new HtmlWebpackPlugin({
             title: 'Library',
-            template: './src/index.html' 
-        })
+            template: './src/index.html',
+            favicon: './src/img/favicon.ico'
+
+        }),
+        new CopyWebpackPlugin({ 
+            patterns: [ 
+             
+             { from: './src/img/favicon.ico',
+                 to: 'icons'
+              }, 
+            
+            ]
+         })
     ],
     module: {
         rules: [
