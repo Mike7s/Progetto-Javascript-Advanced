@@ -155,15 +155,30 @@ h1 {
 }
 
 
-@media (max-width: 800px) {
-  #searchButton{
-    margin-top:5%;
-  }
-  .search-bar {
-    justify-content: flex-end;
-  }
+@media (max-width: 700px) {
+    #searchButton {
+      margin-top: 5%;
+    }
 
-  body {
-    background-repeat: repeat;
+    
+  
+    .search-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+    }
+  
+    body {
+      background-repeat: repeat;
+    }
   }
-}
+  
+  @media (max-width: 600px) {
+    .container{
+        display: grid;
+        grid-template-columns: repeat(2,1fr);
+    }
+  }
+ 
+  
