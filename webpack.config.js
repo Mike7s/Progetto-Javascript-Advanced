@@ -7,7 +7,7 @@ module.exports = {
         index: './src/js/index.js' 
     },
     output: {
-        path: path.resolve(__dirname, 'dist'),
+        path: path.resolve(__dirname, 'public'),
         filename: 'bundle.js'
     },
     plugins: [
@@ -29,7 +29,7 @@ module.exports = {
         ]
     },
     devServer: {
-        static: path.resolve(__dirname, 'dist'),
+        static: path.resolve(__dirname, 'public'),
         open: true
     }
 };
